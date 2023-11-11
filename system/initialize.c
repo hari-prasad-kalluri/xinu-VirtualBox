@@ -24,7 +24,9 @@ struct	memblk	memlist;	/* List of free memory blocks		*/
 /* Active system status */
 
 int	prcount;		/* Total number of live processes	*/
+struct	cpuent	cputab[NCPU];	/* global state for each cpu */
 pid32	currpid;		/* ID of currently executing process	*/
+cid32	currcpu;		/* ID of currently CPU being used	*/
 
 /* Control sequence to reset the console colors and cusor positiion	*/
 
@@ -162,36 +164,7 @@ static	void	sysinit()
 	
 	meminit();
 
-	/* Initialize system variables */
-
-	/* Count the Null process as the first process in the system */
-
-	prcount = 1;
-
-	/* Scheduling is not currently blocked */
-
-	Defer.ndefers = 0;
-
-	/* Initialize process table entries free */
-
-	for (i = 0; i < NPROC; i++) {
-		prptr = &proctab[i];
-		prptr->prstate = PR_FREE;
-		prptr->prname[0] = NULLCH;
-		prptr->prstkbase = NULL;
-		prptr->prprio = 0;
-	}
-
-	/* Initialize the Null process entry */	
-
-	prptr = &proctab[NULLPROC];
-	prptr->prstate = PR_CURR;
-	prptr->prprio = 0;
-	strncpy(prptr->prname, "prnull", 7);
-	prptr->prstkbase = getstk(NULLSTK);
-	prptr->prstklen = NULLSTK;
-	prptr->prstkptr = 0;
-	currpid = NULLPROC;
+	procinit();
 	
 	/* Initialize semaphores */
 
@@ -222,6 +195,11 @@ static	void	sysinit()
 	for (i = 0; i < NDEVS; i++) {
 		init(i);
 	}
+
+	/* Initialize CPU CSRs and start up secondary cores */
+
+	cpuinit();
+	
 	return;
 }
 

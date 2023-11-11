@@ -15,6 +15,7 @@ typedef	unsigned long long uint64;
 typedef	int32	sid32;		/* semaphore ID				*/
 typedef	int16	qid16;		/* queue ID				*/
 typedef	int32	pid32;		/* process ID				*/
+typedef	int32	cid32;		/* core/cpu ID				*/
 typedef	int32	did32;		/* device ID				*/
 typedef	int16	pri16;		/* process priority			*/
 #define	MAXPRIO	0x7fff		/* Maximum possible priority		*/
@@ -61,7 +62,7 @@ extern	qid16	readylist;	/* global ID for list of ready processes*/
 
 #define	CONTEXT	64		/* bytes in a function call context on	*/
 				/* the run-time stack			*/
-#define	QUANTUM	2		/* time slice in milliseconds		*/
+#define	QUANTUM	5		/* time slice in milliseconds		*/
 
 /* Size of the stack for the null process */
 
