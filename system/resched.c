@@ -35,12 +35,25 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 		insert(currpid, readylist, ptold->prprio);
 	}
 
+	struct cpuent *cpuptr;		/* Ptr to cpu entry	 */
+	
+	//Rotate CPU
+	rotatecpu();
+
+	cpuptr = &cputab[currcpu];
+
 	/* Force context switch to highest priority ready process */
 
 	currpid = dequeue(readylist);
+	cpuptr->ppid = cpuptr->cpid;		/* record previous process		*/
+	cpuptr->cpid = currpid;	/* get and record new process	*/
 	ptnew = &proctab[currpid];
 	ptnew->prstate = PR_CURR;
-	preempt = QUANTUM;		/* Reset time slice for process	*/
+	ptnew->prcpu = currcpu;
+	preempt = cpuptr->preempt;		/* Reset time slice for process	*/
+
+	kprintf("currcpu: %d  currpid: %d  preempt: %d clkcounter: %d\n", currcpu, currpid, preempt, clkcountermsec);
+
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
 
 	/* Old process returns here when resumed */

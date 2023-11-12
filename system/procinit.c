@@ -15,6 +15,10 @@ status procinit(void){
 
 	prcount = 1;
 
+	/* Scheduling is not currently blocked */
+
+	Defer.ndefers = 0;
+
 	/* Initialize process table entries free */
 
 	for (i = 0; i < NPROC; i++) {
@@ -36,8 +40,6 @@ status procinit(void){
 	prptr->prstklen = NULLSTK;
 	prptr->prstkptr = 0;
 	cputab[INITCPU].cpid = NULLPROC;
-	cputab[INITCPU].defer.ndefers = 0;
-	cputab[INITCPU].defer.attempt = FALSE;
 	prptr->prcpu = INITCPU;
 	currpid = NULLPROC;
 	currcpu = INITCPU;

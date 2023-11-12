@@ -48,6 +48,8 @@ extern	pid32	create(void *, uint32, pri16, char *, uint32, ...);
 /* in file ctxsw.S */
 extern	void	ctxsw(void *, void *);
 
+extern	cid32 getcid(void);
+
 /* in file dhcp.c */
 extern	uint32	getlocalip(void);
 
@@ -437,6 +439,8 @@ extern	void	rdcdump(did32);
 /* in file rdsread.c */
 
 extern	devcall	rdsread(struct dentry *, char *, int32);
+
+extern void rotatecpu();
 
 /* in file rdssetprio.c */
 

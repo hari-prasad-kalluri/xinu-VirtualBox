@@ -27,6 +27,7 @@ int	prcount;		/* Total number of live processes	*/
 struct	cpuent	cputab[NCPU];	/* global state for each cpu */
 pid32	currpid;		/* ID of currently executing process	*/
 cid32	currcpu;		/* ID of currently CPU being used	*/
+uint32	clkcountermsec;	/* MilliSeconds since boot			*/ 
 
 /* Control sequence to reset the console colors and cusor positiion	*/
 

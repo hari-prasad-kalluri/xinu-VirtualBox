@@ -7,8 +7,7 @@
 struct cpuent {
 	pid32 cpid;					/* ID of currently executing process */
 	pid32 ppid;					/* ID of previously executing process */
-	struct defer defer;		/* Deferred scheduling for cpu */
-	uint32 preempt;				/* count 1000 ms for cpu */ 
+	uint32 preempt;				/* count 5 ms for cpu */ 
 };
 
 extern 	struct	cpuent	cputab[];
