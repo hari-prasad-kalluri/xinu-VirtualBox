@@ -44,11 +44,13 @@ process	main(void)
 	    }
 	}
 	*/
+	kprintf("Process creation started\n");
 	resume(create(cpu_bound, 8192, 10, "cpu", 0));
 	resume(create(cpu_bound, 8192, 10, "cpu", 0));
 	resume(create(cpu_bound, 8192, 10, "cpu", 0));
 	resume(create(io_bound, 8192, 10, "io", 0));
 	resume(create(io_bound, 8192, 10, "io", 0));
 	resume(create(io_bound, 8192, 10, "io", 0));
+	kprintf("Process creation done\n");
 	return OK;
 }

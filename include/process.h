@@ -21,6 +21,7 @@
 
 #define	PNMLEN		16	/* Length of process "name"		*/
 #define	NULLPROC	0	/* ID of the null process		*/
+#define	NOPROC	-1
 
 /* Process initialization constants */
 

@@ -13,8 +13,8 @@ void cpuinit(void){
 		cpuptr = &cputab[i];
 		
 		/* Initialize current and previous processes */
-		cpuptr->cpid = NULLPROC;
-		cpuptr->ppid = NULLPROC;
+		cpuptr->cpid = NOPROC;
+		cpuptr->ppid = NOPROC;
 
 		/* Set initial preemption time */
 		cpuptr->preempt = QUANTUM;

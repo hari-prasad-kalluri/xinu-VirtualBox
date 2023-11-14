@@ -12,6 +12,8 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 {
 	struct procent *ptold;	/* Ptr to table entry for old process	*/
 	struct procent *ptnew;	/* Ptr to table entry for new process	*/
+	struct cpuent *cpuold;		/* Ptr to cpu entry	 */
+	struct cpuent *cpunew;		/* Ptr to cpu entry	 */
 
 	/* If rescheduling is deferred, record attempt and return */
 
@@ -23,36 +25,43 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	/* Point to process table entry for the current (old) process */
 
 	ptold = &proctab[currpid];
+	cpuold = &cputab[currcpu];
 
-	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
-		if (ptold->prprio > firstkey(readylist)) {
-			return;
-		}
-
-		/* Old process will no longer remain current */
-
-		ptold->prstate = PR_READY;
-		insert(currpid, readylist, ptold->prprio);
-	}
-
-	struct cpuent *cpuptr;		/* Ptr to cpu entry	 */
-	
 	//Rotate CPU
 	rotatecpu();
 
-	cpuptr = &cputab[currcpu];
+	cpunew = &cputab[currcpu];
 
-	/* Force context switch to highest priority ready process */
+	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
+		/* Old process will no longer remain current */
 
-	currpid = dequeue(readylist);
-	cpuptr->ppid = cpuptr->cpid;		/* record previous process		*/
-	cpuptr->cpid = currpid;	/* get and record new process	*/
+		ptold->prstate = PR_READY;
+	}
+	if (!isbadpid(cpunew->cpid) && proctab[cpunew->cpid].prstate == PR_READY && proctab[cpunew->cpid].prprio <= firstkey(readylist)) {
+		/* Force context switch to highest priority ready process */
+
+		currpid = dequeue(readylist);
+		insert(cpunew->cpid, readylist, ptnew->prprio);
+	}
+	else if(proctab[cpunew->cpid].prstate != PR_READY){
+		/* Force context switch to highest priority ready process */
+
+		currpid = dequeue(readylist);
+		if (currpid == EMPTY) {
+			currpid = NULLPROC;
+		}
+	}
+	else{
+		currpid = cpunew->cpid;
+	}
+	cpunew->ppid = cpunew->cpid;		/* record previous process		*/
+	cpunew->cpid = currpid;	/* get and record new process	*/
 	ptnew = &proctab[currpid];
 	ptnew->prstate = PR_CURR;
 	ptnew->prcpu = currcpu;
-	preempt = cpuptr->preempt;		/* Reset time slice for process	*/
+	preempt = cpunew->preempt;		/* Reset time slice for process	*/
 
-	kprintf("currcpu: %d  currpid: %d  preempt: %d clkcounter: %d\n", currcpu, currpid, preempt, clkcountermsec);
+	kprintf("currcpu: %d  currpid: %d  preempt: %d clkcountermsec: %d\n", currcpu, currpid, preempt, clkcountermsec);
 
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
 
