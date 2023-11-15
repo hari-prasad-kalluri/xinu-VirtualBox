@@ -4,6 +4,15 @@
 
 struct	defer	Defer;
 
+void print_process_table(){
+	int i=0;
+	for (i = 0; i < NPROC; i++) {
+		if (proctab[i].prstate != PR_FREE) {
+			kprintf("PID: %d State: %d CPU: %d Name: %s\n", i, proctab[i].prstate, proctab[i].prcpu, proctab[i].prname);
+		}
+	}
+}
+
 /*------------------------------------------------------------------------
  *  resched  -  Reschedule processor to highest priority eligible process
  *------------------------------------------------------------------------
@@ -22,6 +31,9 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 		return;
 	}
 
+	kprintf("currcpu: %d  currpid: %d  preempt: %d clkcountermsec: %d\n", currcpu, currpid, preempt, clkcountermsec);
+	print_process_table();
+
 	/* Point to process table entry for the current (old) process */
 
 	ptold = &proctab[currpid];
@@ -37,22 +49,25 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 		ptold->prstate = PR_READY;
 	}
+	else {
+		cpuold->cpid = NOPROC;
+	}
+
 	if (!isbadpid(cpunew->cpid) && proctab[cpunew->cpid].prstate == PR_READY && proctab[cpunew->cpid].prprio <= firstkey(readylist)) {
 		/* Force context switch to highest priority ready process */
 
 		currpid = dequeue(readylist);
-		insert(cpunew->cpid, readylist, ptnew->prprio);
+		insert(cpunew->cpid, readylist, proctab[cpunew->cpid].prprio);
 	}
-	else if(proctab[cpunew->cpid].prstate != PR_READY){
+	else if(!isbadpid(cpunew->cpid) && proctab[cpunew->cpid].prstate == PR_READY) {
+		currpid = cpunew->cpid;
+	}
+	else {
 		/* Force context switch to highest priority ready process */
-
 		currpid = dequeue(readylist);
 		if (currpid == EMPTY) {
 			currpid = NULLPROC;
 		}
-	}
-	else{
-		currpid = cpunew->cpid;
 	}
 	cpunew->ppid = cpunew->cpid;		/* record previous process		*/
 	cpunew->cpid = currpid;	/* get and record new process	*/
