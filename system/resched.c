@@ -13,6 +13,38 @@ void print_process_table(){
 	}
 }
 
+void select_next_cpu(){
+	struct cpuent *cpunew;		/* Ptr to cpu entry	 */
+	cid32 prevcpu = currcpu;
+	//Rotate CPU
+	rotatecpu();
+	int is_next_process_selected = 0;
+	while (currcpu != prevcpu && !is_next_process_selected) {
+		is_next_process_selected = 1;
+		cpunew = &cputab[currcpu];
+		if (!isbadpid(cpunew->cpid) && proctab[cpunew->cpid].prstate == PR_READY && proctab[cpunew->cpid].prprio <= firstkey(readylist)) {
+			/* Force context switch to highest priority ready process */
+			currpid = dequeue(readylist);
+			insert(cpunew->cpid, readylist, proctab[cpunew->cpid].prprio);
+		}
+		else if(!isbadpid(cpunew->cpid) && proctab[cpunew->cpid].prstate == PR_READY) {
+			currpid = cpunew->cpid;
+		}
+		else {
+			/* Force context switch to highest priority ready process */
+			currpid = dequeue(readylist);
+			if (currpid == EMPTY) {
+				is_next_process_selected = 0;
+				rotatecpu();
+			}
+		}
+	}
+	if(!is_next_process_selected){
+		rotatecpu();
+		currpid = NULLPROC;
+	}
+}
+
 /*------------------------------------------------------------------------
  *  resched  -  Reschedule processor to highest priority eligible process
  *------------------------------------------------------------------------
@@ -32,43 +64,25 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	}
 
 	kprintf("currcpu: %d  currpid: %d  preempt: %d clkcountermsec: %d\n", currcpu, currpid, preempt, clkcountermsec);
-	print_process_table();
+	//print_process_table();
 
 	/* Point to process table entry for the current (old) process */
 
 	ptold = &proctab[currpid];
 	cpuold = &cputab[currcpu];
 
-	//Rotate CPU
-	rotatecpu();
-
-	cpunew = &cputab[currcpu];
-
 	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
 		/* Old process will no longer remain current */
-
 		ptold->prstate = PR_READY;
 	}
 	else {
 		cpuold->cpid = NOPROC;
 	}
 
-	if (!isbadpid(cpunew->cpid) && proctab[cpunew->cpid].prstate == PR_READY && proctab[cpunew->cpid].prprio <= firstkey(readylist)) {
-		/* Force context switch to highest priority ready process */
+	select_next_cpu();
 
-		currpid = dequeue(readylist);
-		insert(cpunew->cpid, readylist, proctab[cpunew->cpid].prprio);
-	}
-	else if(!isbadpid(cpunew->cpid) && proctab[cpunew->cpid].prstate == PR_READY) {
-		currpid = cpunew->cpid;
-	}
-	else {
-		/* Force context switch to highest priority ready process */
-		currpid = dequeue(readylist);
-		if (currpid == EMPTY) {
-			currpid = NULLPROC;
-		}
-	}
+	cpunew = &cputab[currcpu];
+
 	cpunew->ppid = cpunew->cpid;		/* record previous process		*/
 	cpunew->cpid = currpid;	/* get and record new process	*/
 	ptnew = &proctab[currpid];
