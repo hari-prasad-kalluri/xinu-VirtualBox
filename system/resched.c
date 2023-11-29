@@ -97,7 +97,7 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	
 
 
-	kprintf("currcpu: %d  currpid: %d  preempt: %d clkcountermsec: %d\n", currcpu, currpid, preempt, clkcountermsec);
+	// kprintf("currcpu: %d  currpid: %d  preempt: %d clkcountermsec: %d\n", currcpu, currpid, preempt, clkcountermsec);
 
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
 

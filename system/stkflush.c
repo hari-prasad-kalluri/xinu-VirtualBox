@@ -11,7 +11,7 @@ void stkflush(pid32 pid) {
 	void* start = prptr->prstkptr;
 	void* end = prptr->prstkbase;
 
-    unsigned long rem= ((unsigned long)start)&64;
+    unsigned long rem= ((unsigned long)start)&63;
 
 	void* current = rem == 0 ? start: start - rem;
 

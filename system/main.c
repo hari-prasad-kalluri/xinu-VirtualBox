@@ -21,17 +21,18 @@ void io_bound(){
 }
 
 void mem_bound() {
-	int big_arr[100000];
+	int arr_size=10000;
+	int big_arr[arr_size];
 
 	int i=0;
-	for(;i<100000;i++){
+	for(;i<arr_size;i++){
 		big_arr[i] = 0;
 	}
 
 	int num_iter=0, max_iter=1000;
 
 	while(num_iter < max_iter) {
-		for(i=0; i<100000; i++) {
+		for(i=0; i<arr_size; i++) {
 			big_arr[i] += 1;
 		}
 	}
@@ -69,8 +70,8 @@ void test_benchmark2(){
 	resume(create(cpu_bound2, 8192, 10, "cpu", 0));
 	resume(create(io_bound2, 8192, 10, "io", 0));
 	resume(create(io_bound2, 8192, 10, "io", 0));
-	resume(create(mem_bound, 1000000, 10, "io", 0));
-	resume(create(mem_bound, 1000000, 10, "io", 0));
+	resume(create(mem_bound, 100000, 10, "io", 0));
+	resume(create(mem_bound, 100000, 10, "io", 0));
 }
 
 
