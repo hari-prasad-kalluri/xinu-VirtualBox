@@ -468,6 +468,9 @@ extern	devcall	sdmcwrite(struct dentry *, char *, int32);
 /* in file sdmcdispatch.S */
 extern	interrupt	sdmcdispatch(void);
 
+/* in file stkflush.c */
+extern void stkflush(pid32);
+
 /* in file read.c */
 extern	syscall	read(did32, char *, uint32);
 
