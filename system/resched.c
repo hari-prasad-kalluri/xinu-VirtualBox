@@ -87,8 +87,15 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	cpunew->cpid = currpid;	/* get and record new process	*/
 	ptnew = &proctab[currpid];
 	ptnew->prstate = PR_CURR;
+	if(ptnew->prcpu != currcpu) {
+		//perform cache flush
+		stkflush(currpid);
+	}
 	ptnew->prcpu = currcpu;
 	preempt = cpunew->preempt;		/* Reset time slice for process	*/
+
+	
+
 
 	kprintf("currcpu: %d  currpid: %d  preempt: %d clkcountermsec: %d\n", currcpu, currpid, preempt, clkcountermsec);
 
