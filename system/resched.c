@@ -63,7 +63,7 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 		return;
 	}
 
-	kprintf("currcpu: %d  currpid: %d  preempt: %d clkcountermsec: %d\n", currcpu, currpid, preempt, clkcountermsec);
+	// kprintf("currcpu: %d  currpid: %d  preempt: %d clkcountermsec: %d\n", currcpu, currpid, preempt, clkcountermsec);
 	//print_process_table();
 
 	/* Point to process table entry for the current (old) process */
@@ -93,9 +93,6 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	}
 	ptnew->prcpu = currcpu;
 	preempt = cpunew->preempt;		/* Reset time slice for process	*/
-
-	
-
 
 	// kprintf("currcpu: %d  currpid: %d  preempt: %d clkcountermsec: %d\n", currcpu, currpid, preempt, clkcountermsec);
 

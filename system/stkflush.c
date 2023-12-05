@@ -8,17 +8,17 @@ void stkflush(pid32 pid) {
 	// kprintf("stkflush started\n");
 	struct procent *prptr = &proctab[pid];
 	
-	void* start = prptr->prstkptr;
-	void* end = prptr->prstkbase;
+	char* start = prptr->prstkptr;
+	char* end = prptr->prstkbase;
 
-    unsigned long rem= ((unsigned long)start)&63;
+	unsigned long clflush_size = 32;
 
-	void* current = rem == 0 ? start: start - rem;
+    char* current = (char *)((unsigned long)start & ~(clflush_size - 1));
 
 	while(current <= end) {
-		clflush(current);
-		current += 64;
+		clflush((void *)current);
 		// kprintf("stack flushing\n");
+		current += clflush_size;
 	}
 	// kprintf("stkflush ended\n");
 }

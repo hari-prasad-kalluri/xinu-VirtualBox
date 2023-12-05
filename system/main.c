@@ -2,16 +2,19 @@
 
 #include <xinu.h>
 
-uint32 endtime = 0;
+uint32 cpu_endtime = 0;
+uint32 io_endtime = 0;
+
+uint32 stop_time = 1200000;
 
 void cpu_bound(){
-	while (clkcountermsec < 10000) {
+	while (clkcountermsec < stop_time) {
         continue;
     }
 }
 
 void io_bound(){
-	while (clkcountermsec < 10000) {
+	while (clkcountermsec < stop_time) {
         int x, i;
         for (i = 0; i < 10000; i++) {
             x = i;
@@ -29,27 +32,34 @@ void mem_bound() {
 		big_arr[i] = 0;
 	}
 
-	int num_iter=0, max_iter=1000;
+	int num_iter=0, billion_counter=0;
 
-	while(num_iter < max_iter) {
+	while(clkcountermsec < stop_time) {
 		for(i=0; i<arr_size; i++) {
 			big_arr[i] += 1;
+			num_iter++;
+		}
+		if(num_iter >= 1000000000){
+			billion_counter++;
+			num_iter = num_iter - 1000000000;
 		}
 	}
-
-	endtime = clkcountermsec;
+	intmask	mask;
+	mask = disable();
+	kprintf("Number of iterations: %d billion %d\n", billion_counter, num_iter);
+	restore(mask);
 }
 
 void cpu_bound2(){
 	int x, i, j;
 	j = 0;
-	while (j < 50) {
+	while (j < 100) {
 		for (i = 0; i < 1000000000; i++) {
 			x = i;
 		}
 		j++;
 	}
-	endtime = clkcountermsec;
+	cpu_endtime = clkcountermsec;
 }
 
 void io_bound2(){
@@ -59,17 +69,20 @@ void io_bound2(){
         for (i = 0; i < 10000; i++) {
             x = i;
         }
-        sleepms(5);
+        sleepms(1);
 		j++;
     }
-	endtime = clkcountermsec;
+	io_endtime = clkcountermsec;
 }
 
 void test_benchmark2(){
 	resume(create(cpu_bound2, 8192, 10, "cpu", 0));
 	resume(create(cpu_bound2, 8192, 10, "cpu", 0));
+	resume(create(cpu_bound2, 8192, 10, "cpu", 0));
 	resume(create(io_bound2, 8192, 10, "io", 0));
 	resume(create(io_bound2, 8192, 10, "io", 0));
+	resume(create(io_bound2, 8192, 10, "io", 0));
+	resume(create(mem_bound, 100000, 10, "io", 0));
 	resume(create(mem_bound, 100000, 10, "io", 0));
 	resume(create(mem_bound, 100000, 10, "io", 0));
 }
@@ -118,8 +131,9 @@ process	main(void)
 
 	test_benchmark2();
 
-	sleep(2000);
+	sleepms(stop_time - clkcountermsec + 1000);
 
-	kprintf("Total time taken: %d\n", endtime - begintime);
+	kprintf("Total time taken [cpu bound]: %d\n", cpu_endtime - begintime);
+	kprintf("Total time taken [io bound]: %d\n", io_endtime - begintime);
 	return OK;
 }
